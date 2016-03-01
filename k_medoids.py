@@ -1,19 +1,23 @@
 import math
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 
 def k_medoids(points, k, num_iter=3):
     centres = [ (1.1, 1.9), (2.5, 3.8), (2.45, 2.4) ]
     for _ in xrange(num_iter):
-        clusters = _assign_points_to_clusters(points, centres)
+        clusters = _form_clusters(points, centres)
+        clusters = _update_clusters_k_medoids(clusters)
         print 'clusters', clusters
-        _update_clusters_k_medoids(clusters)
-        print 'clusters after update', clusters
     return clusters
 
 def _update_clusters_k_medoids(clusters):
-    for centre, points in clusters.iteritems():
+    new_clusters = {}
+    for centre in clusters.keys():
+        points = clusters[centre]  # points in cluster
         new_centre = _find_centre(points)
-        clusters[new_centre] = clusters[centre].pop()  # replace old key
+        new_clusters[new_centre] = clusters[centre]  # add new
+    return new_clusters
 
 def _find_centre(points):
     min_dist = float('inf')
@@ -25,7 +29,7 @@ def _find_centre(points):
             centre = points[index]
     return centre
 
-def _assign_points_to_clusters(points, centres):
+def _form_clusters(points, centres):
     # points  = [ (1.3, 4.2), (3.1, 5.2), (4.2, 5.3) ]
     # centres = [ (1, 1),     (2, 2) ]
     clusters = {}
@@ -57,11 +61,15 @@ def _distance(point1, point2):
         dist += ( point1[i] - point2[i] ) ** 2
         return math.sqrt(dist)
 
-def plot(data):
+def plot_data(data):
     xs = [line[1] for line in data]
     ys = [line[2] for line in data]
     plt.plot(xs, ys, '+')
     plt.show()
+
+# def plot_clusters(clusters):
+#
+
 
 if __name__ == '__main__':
     data = [
@@ -81,7 +89,8 @@ if __name__ == '__main__':
 
     # points  = [ (1.3, 4.2), (3.1, 5.2), (4.2, 5.3) ]
     # centres = [ (1, 1),     (2, 2) ]
-    # print _assign_points_to_clusters(points, centres)
+    # print _form_clusters(points, centres)
 
-    # k_medoids(points, 3)
-    print _find_centre(zip(range(10),range(10)))
+    print k_medoids(points, 3)
+
+    # plot_data(data)
