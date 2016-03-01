@@ -1,19 +1,54 @@
 import math
 import matplotlib.pyplot as plt
 
-def k_medoids(data, k):
-    pass
+def k_medoids(points, k, num_iter=3):
+    centres = [ (1.1, 1.9), (2.5, 3.8), (2.45, 2.4) ]
+    for _ in xrange(num_iter):
+        clusters = _assign_points_to_clusters(points, centres)
+        print 'clusters', clusters
+        _update_clusters_k_medoids(clusters)
+        print 'clusters after update', clusters
+    return clusters
 
-def distance_matrix(data):
+def _update_clusters_k_medoids(clusters):
+    for centre, points in clusters.iteritems():
+        new_centre = _find_centre(points)
+        clusters[new_centre] = clusters[centre].pop()  # replace old key
+
+def _find_centre(points):
+    min_dist = float('inf')
+    dist_matrix = distance_matrix(points)
+    for index, row in enumerate(dist_matrix):
+        cur_dist = sum(row)
+        if cur_dist < min_dist:
+            min_dist = cur_dist
+            centre = points[index]
+    return centre
+
+def _assign_points_to_clusters(points, centres):
+    # points  = [ (1.3, 4.2), (3.1, 5.2), (4.2, 5.3) ]
+    # centres = [ (1, 1),     (2, 2) ]
+    clusters = {}
+    for centre in centres:
+        clusters[centre] = []
+    for point in points:
+        min_dist = float('inf')
+        for centre in centres:
+            cur_dist = _distance(point, centre)
+            if cur_dist < min_dist:
+                min_dist = cur_dist
+                assigned_centre = centre
+        clusters[assigned_centre].append(point)  # add point to closest cluster
+    return clusters  # {(1, 1): [(1.3, 4.2)], (2, 2): [(3.1, 5.2), (4.2, 5.3)]}
+
+def distance_matrix(points):
     matrix = []
-    for entry in data:
-        entry_coords = entry[1:-1]
-        entry_dists = []
-        for other_entry in data:
-            other_entry_coords = other_entry[1:-1]
-            distance_between = _distance(entry_coords, other_entry_coords)
-            entry_dists.append(round(distance_between, 3))
-        matrix.append(entry_dists)
+    for point in points:
+        point_dists = []
+        for other_point in points:
+            distance_between = _distance(point, other_point)
+            point_dists.append(round(distance_between, 3))
+        matrix.append(point_dists)
     return matrix
 
 def _distance(point1, point2):
@@ -42,5 +77,11 @@ if __name__ == '__main__':
         ['Gene10', 4.9,  0.4, 'C3']
     ]
 
-    # plot(data)
-    print distance_matrix(data)
+    points = [ (line[1], line[2]) for line in data ]
+
+    # points  = [ (1.3, 4.2), (3.1, 5.2), (4.2, 5.3) ]
+    # centres = [ (1, 1),     (2, 2) ]
+    # print _assign_points_to_clusters(points, centres)
+
+    # k_medoids(points, 3)
+    print _find_centre(zip(range(10),range(10)))
